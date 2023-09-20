@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using OpenMod.API.Eventing;
 using OpenMod.Core.Plugins.Events;
+using OpenMod.Core.Users.Events;
 using OpenMod.Economy.Controllers;
 using OpenMod.Extensions.Economy.Abstractions;
 
@@ -13,27 +14,20 @@ using OpenMod.Extensions.Economy.Abstractions;
 namespace OpenMod.Economy.Events
 {
     [UsedImplicitly]
-    public sealed class PluginConfigurationChangedListener : IEventListener<PluginConfigurationChangedEvent>
+    public sealed class PlayerConnectedEvent : IEventListener<IUserConnectedEvent>
     {
-        private readonly IEconomyProvider m_EconomyProvider;
         private readonly ILogger<Economy> m_Logger;
 
-        public PluginConfigurationChangedListener(IEconomyProvider economyProvider, ILogger<Economy> logger)
+        public PlayerConnectedEvent(IEconomyProvider economyProvider, ILogger<Economy> logger)
         {
-            m_EconomyProvider = economyProvider;
             m_Logger = logger;
         }
 
-        public async Task HandleEventAsync(object sender, PluginConfigurationChangedEvent @event)
+
+        public async Task HandleEventAsync(object sender, IUserConnectedEvent @event)
         {
-            if (@event.Plugin is not Economy)
-                return;
+            var Usuario = @event.User;
 
-            if (m_EconomyProvider is not DatabaseController databaseController)
-                return;
-
-            await databaseController.ConfigurationChangedBaseAsync();
-            m_Logger.LogInformation($"Config changed! Database type set to: '{databaseController.DbStoreType}'");
         }
     }
 }
